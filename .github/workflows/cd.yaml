@@ -13,6 +13,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       
+    - name: Debug
+      run: "echo ${{github.ref}}"
+      
     - name: Setup scala
       uses: olafurpg/setup-scala@v10
       
@@ -56,6 +59,25 @@ jobs:
           fetch-depth: 0
         
       - name: Bump version
+        id: bump
         uses: codacy/git-version@2.4.0
+        
+      - name: Docker Image Artifact Download
+        uses: ishworkh/docker-image-artifact-download@v1
+        with:
+          image: "hydrosphere/serving-gateway:${{ github.sha }}"
+          
+      - name: Retag image
+        run: "docker tag hydrosphere/serving-gateway:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/serving-gateway:v${{ steps.bump.outputs.version }}"
+      
+      - name: Push image
+        run: "docker push ${{ secrets.DOCKERHUB_USERNAME }}/serving-gateway:v${{ steps.bump.outputs.version }}"
+          
+      - name: Tag commit
+        run: "git tag v${{steps.bump.outputs.version}}"
+        
+      - name: Push tag
+        run: "git push --tags"
+        
    
    
