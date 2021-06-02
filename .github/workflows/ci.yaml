@@ -8,6 +8,13 @@ jobs:
       - name: Check ref output
         run: echo ${{ github.ref }}
         
+      - name: Setup scala
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        uses: olafurpg/setup-scala@v10
+        with:
+         java-version: adopt@1.11
+      - run: "sbt -h"
+        
   Setup:
     runs-on: ubuntu-latest
     steps:
