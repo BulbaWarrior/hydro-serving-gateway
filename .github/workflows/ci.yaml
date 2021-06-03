@@ -13,6 +13,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        
       - name: Restore cache
         id: restore-cache
         uses: actions/cache@v2.1.5
@@ -31,15 +32,6 @@ jobs:
       - name: Initialize project
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: "sbt initialize"
-        
-      - name: Store new cache
-        if: steps.restore-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v2.1.5
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.sbt
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', '**/Dependencies.scala') }}
                 
   Test:
     runs-on: ubuntu-latest
@@ -61,8 +53,11 @@ jobs:
             ~/.sbt
           key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', '**/Dependencies.scala') }}
           
+      - name: Register problem matcher
+        run: echo "::add-matcher::.github/matchers/sbt.json"
+        
       - name: Run tests
-        run: "sbt test"
+        run: "sbt test -no-colors"
         
   Build_image:
     runs-on: ubuntu-latest
